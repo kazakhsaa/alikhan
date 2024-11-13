@@ -1,8 +1,9 @@
+// src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
-import HomePage from '../components/HomePage.vue';
-import UserRegister from '../components/UserRegister.vue';
-import UserLogin from '../components/UserLogin.vue';
-import Dashboard from '../components/Dashboard.vue';
+import HomePage from '../views/HomePage.vue';
+import RegisterPage from '../views/RegisterPage.vue';
+import LoginPage from '../views/LoginPage.vue';
+import VerifyMFAPage from '../views/VerifyMFAPage.vue'; // Если компонент существует
 import store from '../store';
 
 const routes = [
@@ -10,24 +11,22 @@ const routes = [
     path: '/',
     name: 'HomePage',
     component: HomePage,
+    meta: { requiresAuth: true },
   },
   {
     path: '/register',
-    name: 'UserRegister',
-    component: UserRegister,
-    meta: { requiresGuest: true },
+    name: 'RegisterPage',
+    component: RegisterPage,
   },
   {
     path: '/login',
-    name: 'UserLogin',
-    component: UserLogin,
-    meta: { requiresGuest: true },
+    name: 'LoginPage',
+    component: LoginPage,
   },
   {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: Dashboard,
-    meta: { requiresAuth: true },
+    path: '/verify-mfa',
+    name: 'VerifyMFAPage',
+    component: VerifyMFAPage,
   },
 ];
 
@@ -36,12 +35,16 @@ const router = createRouter({
   routes,
 });
 
-// Navigation guards
+// Защита маршрутов
 router.beforeEach((to, from, next) => {
-  if (to.meta.requiresAuth && !store.getters.isLoggedIn) {
-    next('/login');
-  } else if (to.meta.requiresGuest && store.getters.isLoggedIn) {
-    next('/dashboard');
+  const isAuthenticated = store.getters['auth/isAuthenticated'];
+
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    if (!isAuthenticated) {
+      next({ name: 'LoginPage' });
+    } else {
+      next();
+    }
   } else {
     next();
   }

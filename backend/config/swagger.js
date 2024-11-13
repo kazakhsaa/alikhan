@@ -1,31 +1,36 @@
-const swaggerJSDoc = require('swagger-jsdoc');
+// config/swagger.js
+const express = require('express');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsDoc = require('swagger-jsdoc');
 
-const options = {
-  definition: {
-    openapi: '3.0.0',
+const app = express();
+
+// Настройки Swagger
+const swaggerOptions = {
+  swaggerDefinition: {
+    openapi: '3.0.0', // Версия OpenAPI
     info: {
-      title: 'Ваше API',
+      title: 'API Documentation',
       version: '1.0.0',
-      description: 'Документация вашего API с использованием Swagger',
+      description: 'Документация вашего API',
     },
-    components: {
-        securitySchemes: {
-          bearerAuth: {
-            type: 'http',
-            scheme: 'bearer',
-            bearerFormat: 'JWT',
-          },
-        },
-      },
     servers: [
       {
-        url: 'http://localhost:5001', // Укажите URL вашего сервера
+        url: 'http://localhost:5001', // Адрес вашего сервера
       },
     ],
   },
-  apis: ['./routes/*.js'], // Пути к файлам с вашими API-эндпоинтами
+  apis: ['./routes/*.js'], // Путь к файлам с описанием ваших эндпоинтов
 };
 
-const swaggerSpec = swaggerJSDoc(options);
+// Инициализация Swagger
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-module.exports = swaggerSpec;
+// Ваши маршруты и остальной код
+// ...
+
+// Запуск сервера
+app.listen(5001, () => {
+  console.log('Сервер запущен на http://localhost:5001');
+});
